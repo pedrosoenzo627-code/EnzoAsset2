@@ -40,6 +40,92 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+// Shared fulfillment logic for Webhook and Fallback Verification
+async function fulfillOrder(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata;
+  if (!metadata) {
+    console.error("[FULFILLMENT] No metadata found in session.");
+    return;
+  }
+
+  const { userId, productId, productName, amount, creatorId } = metadata;
+  const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+
+  // 1. DISCORD NOTIFICATION
+  if (WEBHOOK_URL) {
+    try {
+      await axios.post(WEBHOOK_URL, {
+        username: "Enzo Assets Notificador",
+        avatar_url: "https://enzo-asset2.vercel.app/logo.png",
+        embeds: [{
+          title: "🚀 Nova Venda Realizada!",
+          color: 0xC1FF00,
+          fields: [
+            { name: "📦 Produto", value: productName || "Asset Digital", inline: true },
+            { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
+            { name: "👤 Comprador", value: session.customer_details?.email || "Cliente", inline: false }
+          ],
+          footer: { text: "Enzo Assets - O melhor para seu jogo" },
+          timestamp: new Date()
+        }]
+      });
+      console.log(`[DISCORD] Aviso de venda enviado para: ${productName}`);
+    } catch (discordError) {
+      console.error("[DISCORD] Erro ao enviar aviso:", discordError);
+    }
+  }
+
+  // 2. DATABASE UPDATE (Requires FIREBASE_SERVICE_ACCOUNT)
+  if (admin.apps.length > 0) {
+    const db = admin.firestore();
+    try {
+      // Check if this session was already processed to avoid duplicates
+      const existingPurchase = await db.collection("purchases")
+        .where("stripeSessionId", "==", session.id)
+        .limit(1)
+        .get();
+
+      if (!existingPurchase.empty) {
+        console.log(`[FULFILLMENT] Purchase ${session.id} already processed. Skipping.`);
+        return;
+      }
+
+      // Fetch product data to ensure we have latest URLs
+      const productDoc = await db.collection("products").doc(productId).get();
+      const pData = productDoc.exists ? productDoc.data() : null;
+
+      await db.collection("purchases").add({
+        userId,
+        productId,
+        productName: productName || pData?.name || "Asset",
+        productImage: pData?.imageUrl || "https://picsum.photos/seed/asset/400/400",
+        fileUrl: pData?.fileUrl || "",
+        price: parseFloat(amount),
+        creatorId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        stripeSessionId: session.id
+      });
+
+      // Update Creator Balance
+      const creatorRef = db.collection("profiles").doc(creatorId);
+      await db.runTransaction(async (transaction) => {
+        const creatorDoc = await transaction.get(creatorRef);
+        const currentBalance = creatorDoc.exists ? (creatorDoc.data()?.balance || 0) : 0;
+        transaction.update(creatorRef, {
+          balance: currentBalance + parseFloat(amount),
+          totalSales: admin.firestore.FieldValue.increment(1)
+        });
+      });
+
+      console.log(`[SUCCESS] Database updated for user: ${userId}`);
+    } catch (dbError) {
+      console.error("[FIREBASE ERROR] Failed to update database:", dbError);
+    }
+  } else {
+    console.warn("[FULFILLMENT] FIREBASE_SERVICE_ACCOUNT is missing. Database records skipped.");
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -55,7 +141,6 @@ async function startServer() {
       if (webhookSecret && sig) {
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
       } else {
-        // Fallback for demo without verification
         event = JSON.parse(req.body.toString());
       }
     } catch (err: any) {
@@ -63,88 +148,11 @@ async function startServer() {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
     console.log(`[STRIPE WEBHOOK] Received event type: ${event.type}`);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const metadata = session.metadata;
-
-      if (!metadata) {
-        console.error("[STRIPE WEBHOOK] No metadata found in session.");
-        return res.json({ received: true });
-      }
-
-      const { userId, productId, productName, amount, creatorId } = metadata;
-      const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-
-      // 1. DISCORD LOGIC (Attempt even if Admin fails)
-      if (WEBHOOK_URL) {
-        try {
-          await axios.post(WEBHOOK_URL, {
-            username: "Enzo Assets Notificador",
-            avatar_url: "https://enzo-asset2.vercel.app/logo.png",
-            embeds: [{
-              title: "🚀 Nova Venda Realizada!",
-              color: 0xC1FF00,
-              fields: [
-                { name: "📦 Produto", value: productName || "Asset Digital", inline: true },
-                { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
-                { name: "👤 Comprador", value: session.customer_details?.email || "Cliente", inline: false }
-              ],
-              footer: { text: "Enzo Assets - O melhor para seu jogo" },
-              timestamp: new Date()
-            }]
-          });
-          console.log(`[DISCORD] Aviso de venda enviado: ${productName}`);
-        } catch (discordError) {
-          console.error("[DISCORD] Erro ao enviar aviso:", discordError);
-        }
-      }
-
-      // 2. FIREBASE LOGIC
-      if (admin.apps.length > 0) {
-        const db = admin.firestore();
-        try {
-          // Fetch product data to store alongside the purchase
-          const productDoc = await db.collection("products").doc(productId).get();
-          const productData = productDoc.exists ? productDoc.data() : null;
-          
-          if (!productData) {
-            throw new Error(`Product ${productId} not found in database.`);
-          }
-
-          // 1. Add to purchases collection
-          await db.collection("purchases").add({
-            userId,
-            productId,
-            productName: productData.name,
-            productImage: productData.imageUrl,
-            fileUrl: productData.fileUrl,
-            price: parseFloat(amount),
-            creatorId: productData.creatorId,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            stripeSessionId: session.id
-          });
-
-          // 2. Update creator's balance
-          const creatorRef = db.collection("profiles").doc(creatorId);
-          await db.runTransaction(async (transaction) => {
-             const creatorDoc = await transaction.get(creatorRef);
-             const currentBalance = creatorDoc.exists ? (creatorDoc.data()?.balance || 0) : 0;
-             transaction.update(creatorRef, {
-               balance: currentBalance + parseFloat(amount),
-               totalSales: admin.firestore.FieldValue.increment(1)
-             });
-          });
-
-          console.log(`[SUCCESS] Database updated for purchase: User ${userId}`);
-        } catch (error) {
-          console.error("[FIREBASE ERROR] Webhook failed to update DB:", error);
-        }
-      } else {
-        console.warn("[STRIPE WEBHOOK] FIREBASE_SERVICE_ACCOUNT is missing. Database NOT updated but session was completed.");
-      }
+      await fulfillOrder(session);
     }
 
     res.json({ received: true });
@@ -158,7 +166,28 @@ async function startServer() {
   app.use(express.json());
 
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", version: "1.0.4", timestamp: new Date().toISOString() });
+    res.json({ status: "ok", version: "1.0.5", timestamp: new Date().toISOString() });
+  });
+
+  // API Route: Verify Session Fallback (Fired by Frontend)
+  app.post("/api/payments/verify-session", async (req, res) => {
+    const { sessionId } = req.body;
+    if (!sessionId) return res.status(400).json({ error: "Missing sessionId" });
+
+    try {
+      console.log(`[VERIFY] Manual check for session: ${sessionId}`);
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status === 'paid') {
+        await fulfillOrder(session);
+        return res.json({ success: true, status: 'paid' });
+      } else {
+        return res.json({ success: false, status: session.payment_status });
+      }
+    } catch (error: any) {
+      console.error("[VERIFY ERROR]", error);
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // API Route: Create Stripe Checkout Session

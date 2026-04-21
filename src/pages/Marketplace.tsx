@@ -19,8 +19,27 @@ export const Marketplace = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('success') === 'true') {
+    const sessionId = params.get('session_id');
+
+    if (params.get('success') === 'true' && sessionId) {
       setCheckoutStep('success');
+      
+      // Proactive verification fallback
+      const verifySession = async () => {
+        try {
+          await fetch('/api/payments/verify-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId })
+          });
+          console.log("[VERIFY] Sessão verificada com sucesso.");
+        } catch (e) {
+          console.error("[VERIFY] Erro na verificação manual:", e);
+        }
+      };
+      
+      verifySession();
+
       // Set a fake selected product if none to show success UI
       if (!selectedProduct) {
         setSelectedProduct({ name: 'Aquisição Sincronizada' } as any);
