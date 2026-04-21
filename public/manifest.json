@@ -3,16 +3,16 @@
   "name": "Enzo Assets | Roblox Marketplace",
   "icons": [
     {
-      "src": "/logo-192.png",
+      "src": "https://wsrv.nl/?url=enzo-asset2.vercel.app/logo.jpg&output=png&w=192&h=192",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/logo-512.png",
+      "src": "https://wsrv.nl/?url=enzo-asset2.vercel.app/logo.jpg&output=png&w=512&h=512",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
   "start_url": "/",
