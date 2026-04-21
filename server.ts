@@ -61,22 +61,44 @@ async function startServer() {
     }
 
     // Handle the event
+    console.log(`[STRIPE WEBHOOK] Received event type: ${event.type}`);
+
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const metadata = session.metadata;
 
-      if (metadata && admin.apps.length > 0) {
+      if (!metadata) {
+        console.error("[STRIPE WEBHOOK] No metadata found in session.");
+        return res.json({ received: true });
+      }
+
+      if (admin.apps.length === 0) {
+        console.error("[FIREBASE ADMIN] Admin SDK not initialized. Missing FIREBASE_SERVICE_ACCOUNT environment variable?");
+        return res.status(500).json({ error: "Server infrastructure not fully configured." });
+      }
         const { userId, productId, amount, creatorId } = metadata;
         const db = admin.firestore();
 
         try {
-          // 1. Add product to user's library
-          await db.collection("libraries").add({
+          // Fetch product data to store alongside the purchase
+          const productDoc = await db.collection("products").doc(productId).get();
+          const productData = productDoc.exists ? productDoc.data() : null;
+          
+          if (!productData) {
+            throw new Error(`Product ${productId} not found in database.`);
+          }
+
+          // 1. Add to purchases collection (this is what MyLibrary.tsx queries)
+          await db.collection("purchases").add({
             userId,
             productId,
-            purchasedAt: admin.firestore.FieldValue.serverTimestamp(),
+            productName: productData.name,
+            productImage: productData.imageUrl,
+            fileUrl: productData.fileUrl,
             price: parseFloat(amount),
-            status: "active"
+            creatorId: productData.creatorId,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            stripeSessionId: session.id
           });
 
           // 2. Update creator's balance
@@ -90,7 +112,7 @@ async function startServer() {
              });
           });
 
-          // 3. Log sale
+          // 3. Log sale (redundant but kept for separate tracking if needed, or we can use purchases)
           await db.collection("sales").add({
             productId,
             buyerId: userId,
@@ -104,11 +126,7 @@ async function startServer() {
           const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
           if (WEBHOOK_URL) {
             try {
-              // Fetch extra info for the message
-              const prodDoc = await db.collection("products").doc(productId).get();
               const userDoc = await db.collection("users").doc(userId).get();
-              
-              const productName = prodDoc.exists ? prodDoc.data()?.name : "Produto Desconhecido";
               const buyerName = userDoc.exists ? userDoc.data()?.displayName : (session.customer_details?.email || "Comprador Anônimo");
               
               await axios.post(WEBHOOK_URL, {
@@ -116,9 +134,9 @@ async function startServer() {
                 avatar_url: "https://enzo-asset2.vercel.app/logo.png",
                 embeds: [{
                   title: "🚀 Nova Venda Realizada!",
-                  color: 0xC1FF00, // Enzo Primary Green
+                  color: 0xC1FF00,
                   fields: [
-                    { name: "📦 Produto", value: productName, inline: true },
+                    { name: "📦 Produto", value: productData.name, inline: true },
                     { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
                     { name: "👤 Comprador", value: buyerName, inline: false }
                   ],
@@ -132,11 +150,10 @@ async function startServer() {
             }
           }
 
-          console.log(`Purchase successful: User ${userId} bought ${productId}`);
+          console.log(`[SUCCESS] Purchase processed: User ${userId} bought ${productData.name}`);
         } catch (error) {
-          console.error("Error processing successful payment:", error);
+          console.error("[ERROR] Processing successful payment:", error);
         }
-      }
     }
 
     res.json({ received: true });
