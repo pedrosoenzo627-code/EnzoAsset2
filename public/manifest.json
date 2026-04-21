@@ -3,20 +3,14 @@
   "name": "Enzo Assets | Roblox Marketplace",
   "icons": [
     {
-      "src": "/logo.jpg",
+      "src": "logo.jpg",
       "type": "image/jpeg",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/logo.jpg",
+      "src": "logo.jpg",
       "type": "image/jpeg",
-      "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "https://img.icons8.com/color/512/purple-frowning-face.png",
-      "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     }
