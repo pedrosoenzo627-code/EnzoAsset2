@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import Stripe from "stripe";
 import admin from "firebase-admin";
+import axios from "axios";
 
 console.log("[SERVER] Starting server initialization...");
 
@@ -98,6 +99,38 @@ async function startServer() {
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
             stripeSessionId: session.id
           });
+
+          // 4. Send Discord Notification
+          const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+          if (WEBHOOK_URL) {
+            try {
+              // Fetch extra info for the message
+              const prodDoc = await db.collection("products").doc(productId).get();
+              const userDoc = await db.collection("users").doc(userId).get();
+              
+              const productName = prodDoc.exists ? prodDoc.data()?.name : "Produto Desconhecido";
+              const buyerName = userDoc.exists ? userDoc.data()?.displayName : (session.customer_details?.email || "Comprador Anônimo");
+              
+              await axios.post(WEBHOOK_URL, {
+                username: "Enzo Assets Notificador",
+                avatar_url: "https://enzo-asset2.vercel.app/logo.png",
+                embeds: [{
+                  title: "🚀 Nova Venda Realizada!",
+                  color: 0xC1FF00, // Enzo Primary Green
+                  fields: [
+                    { name: "📦 Produto", value: productName, inline: true },
+                    { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
+                    { name: "👤 Comprador", value: buyerName, inline: false }
+                  ],
+                  footer: { text: "Enzo Assets - O melhor para seu jogo" },
+                  timestamp: new Date()
+                }]
+              });
+              console.log("[DISCORD] Aviso de venda enviado!");
+            } catch (discordError) {
+              console.error("[DISCORD] Erro ao enviar aviso:", discordError);
+            }
+          }
 
           console.log(`Purchase successful: User ${userId} bought ${productId}`);
         } catch (error) {
