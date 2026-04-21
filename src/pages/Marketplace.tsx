@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, limit, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, limit, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Product, PRODUCT_CATEGORIES } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -24,17 +24,56 @@ export const Marketplace = () => {
     if (params.get('success') === 'true' && sessionId) {
       setCheckoutStep('success');
       
-      // Proactive verification fallback
+      // Proactive verification fallback + Client-Side Sync Plan B
       const verifySession = async () => {
         try {
-          await fetch('/api/payments/verify-session', {
+          const response = await fetch('/api/payments/verify-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId })
           });
-          console.log("[VERIFY] Sessão verificada com sucesso.");
+          
+          const data = await response.json();
+          console.log("[VERIFY] Resposta do servidor:", data);
+
+          if (data.success && data.status === 'paid' && data.metadata && user) {
+            console.log("[SYNC] Iniciando sincronização via navegador (Plano B)...");
+            
+            // Check for existing purchase to prevent duplicates
+            const { getDocs, query, collection, where } = await import('firebase/firestore');
+            const q = query(
+              collection(db, 'purchases'), 
+              where('stripeSessionId', '==', sessionId)
+            );
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+              await addDoc(collection(db, 'purchases'), {
+                userId: user.uid,
+                productId: data.metadata.productId,
+                productName: data.metadata.productName || 'Asset Digital',
+                productImage: data.metadata.productImage || 'https://picsum.photos/seed/asset/400/400',
+                fileUrl: data.metadata.fileUrl || '',
+                price: parseFloat(data.metadata.amount || '0'),
+                creatorId: data.metadata.creatorId,
+                createdAt: serverTimestamp(),
+                stripeSessionId: sessionId,
+                syncSource: 'client_fallback'
+              });
+              console.log("[SYNC] Compra sincronizada manualmente no cofre!");
+            } else {
+              console.log("[SYNC] Compra já registrada anteriormente. Pulando duplicata.");
+            }
+            
+            // Update UI to show real product details
+            setSelectedProduct({ 
+              name: data.metadata.productName || 'Aquisição Sincronizada',
+              imageUrl: data.metadata.productImage,
+              price: parseFloat(data.metadata.amount || '0')
+            } as any);
+          }
         } catch (e) {
-          console.error("[VERIFY] Erro na verificação manual:", e);
+          console.error("[VERIFY/SYNC] Erro no fluxo de sincronização:", e);
         }
       };
       
@@ -85,7 +124,8 @@ export const Marketplace = () => {
             description: selectedProduct.description,
             price: selectedProduct.price,
             creatorId: selectedProduct.creatorId,
-            thumbnail: selectedProduct.imageUrl
+            thumbnail: selectedProduct.imageUrl,
+            fileUrl: selectedProduct.fileUrl // Added for sync
           },
           user: {
             uid: user.uid,

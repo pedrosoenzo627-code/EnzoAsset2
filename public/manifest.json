@@ -3,12 +3,12 @@
   "name": "Enzo Assets | Roblox Marketplace",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/enzo/192/192",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://picsum.photos/seed/enzo/512/512",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }

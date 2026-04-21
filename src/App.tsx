@@ -57,7 +57,24 @@ const AppContent = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-16">
               <div className="space-y-8">
                 <div className="flex items-center space-x-6 group cursor-pointer">
-                  <div className="w-16 h-16 rounded-[1rem] bg-white text-black flex items-center justify-center font-display italic text-3xl shadow-[0_0_50px_rgba(255,255,255,0.1)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">E</div>
+                  <div className="w-16 h-16 rounded-[1rem] bg-black overflow-hidden border border-white/5 flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.05)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <img 
+                      src="/logo.png" 
+                      className="w-full h-full object-cover" 
+                      alt="Enzo Logo" 
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const span = document.createElement('span');
+                          span.className = 'text-white font-display italic text-3xl';
+                          span.innerText = 'E';
+                          parent.appendChild(span);
+                        }
+                      }}
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
                   <div className="flex flex-col -space-y-2">
                     <span className="text-4xl font-display italic text-white tracking-widest">ENZO ASSETS</span>
                     <span className="text-[10px] font-tech font-black tracking-[0.6em] text-primary uppercase opacity-60">PROTOCOLO_POLY_CHROME</span>

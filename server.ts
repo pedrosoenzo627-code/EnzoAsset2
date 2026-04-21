@@ -179,8 +179,14 @@ async function startServer() {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
       if (session.payment_status === 'paid') {
+        // Attempt fulfillment if we have admin
         await fulfillOrder(session);
-        return res.json({ success: true, status: 'paid' });
+        return res.json({ 
+          success: true, 
+          status: 'paid', 
+          metadata: session.metadata, // Return metadata for Client-Side Sync Plan B
+          customerEmail: session.customer_details?.email 
+        });
       } else {
         return res.json({ success: false, status: session.payment_status });
       }
@@ -228,7 +234,9 @@ async function startServer() {
         metadata: {
           userId: user.uid,
           productId: product.id,
-          productName: product.name, // Added for reliable Discord notifications
+          productName: product.name,
+          productImage: product.thumbnail || "", // For client-side sync
+          fileUrl: product.fileUrl || "", // For client-side sync
           creatorId: product.creatorId,
           amount: product.price.toString(),
         },
