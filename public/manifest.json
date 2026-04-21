@@ -3,15 +3,15 @@
   "name": "Enzo Assets | Roblox Marketplace",
   "icons": [
     {
-      "src": "logo.jpg",
+      "src": "/logo.jpg",
       "type": "image/jpeg",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "logo.jpg",
-      "type": "image/jpeg",
-      "sizes": "512x512",
+      "src": "https://placehold.co/192x192/7c3aed/ffffff.png?text=ENZO",
+      "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any"
     }
   ],
