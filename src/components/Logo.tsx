@@ -28,16 +28,17 @@ export const Logo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg
         className={`${sizes[size]} rounded-[1rem] overflow-hidden border border-white/10 flex items-center justify-center bg-black relative z-10 shadow-lg`}
       >
         <img 
-          src="/logo.png" 
+          src="/logo.jpg" 
           alt="Enzo Assets" 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={(e) => {
+            console.warn("Logo failed to load at /logo.png. Triggering fallback.");
             const el = e.currentTarget;
-            el.style.display = 'none';
+            el.style.opacity = '0'; // Hide broken image gracefully
             const parent = el.parentElement;
             if (parent && !parent.querySelector('.fallback-e')) {
               const span = document.createElement('span');
-              span.className = 'fallback-e text-white font-display italic select-none';
+              span.className = 'fallback-e text-white font-display italic select-none absolute inset-0 flex items-center justify-center';
               span.style.fontSize = iconSizes[size] + 'px';
               span.innerText = 'E';
               parent.appendChild(span);

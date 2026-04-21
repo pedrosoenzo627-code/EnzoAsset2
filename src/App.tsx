@@ -59,15 +59,17 @@ const AppContent = () => {
                 <div className="flex items-center space-x-6 group cursor-pointer">
                   <div className="w-16 h-16 rounded-[1rem] bg-black overflow-hidden border border-white/5 flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.05)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                     <img 
-                      src="/logo.png" 
+                      src="/logo.jpg" 
                       className="w-full h-full object-cover" 
                       alt="Enzo Logo" 
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
+                        console.warn("Footer Logo failed to load.");
+                        const el = e.currentTarget;
+                        el.style.opacity = '0';
+                        const parent = el.parentElement;
+                        if (parent && !parent.querySelector('.fallback-e')) {
                           const span = document.createElement('span');
-                          span.className = 'text-white font-display italic text-3xl';
+                          span.className = 'fallback-e text-white font-display italic text-3xl select-none';
                           span.innerText = 'E';
                           parent.appendChild(span);
                         }
