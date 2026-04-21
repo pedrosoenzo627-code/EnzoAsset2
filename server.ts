@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -397,7 +396,8 @@ return Config
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    const { createServer } = await import("vite");
+    const vite = await createServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
@@ -411,7 +411,8 @@ return Config
   }
 
   // Start Server
-  if (process.env.NODE_ENV !== "test") {
+  const isVercel = process.env.VERCEL === "1";
+  if (process.env.NODE_ENV !== "test" && !isVercel) {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
@@ -421,4 +422,12 @@ return Config
 }
 
 const appPromise = startServer();
-export default appPromise;
+
+// Standard export for local development
+export { appPromise };
+
+// Vercel serverless function handler
+export default async (req: any, res: any) => {
+  const app = await appPromise;
+  return app(req, res);
+};
