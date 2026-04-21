@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, User, LogOut, Menu, X, Rocket, ShieldCheck, Library } from 'lucide-react';
+import { ShoppingBag, User, LogOut, Menu, X, Rocket, ShieldCheck, Library, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { Logo } from './Logo';
@@ -16,7 +16,7 @@ export const Navbar = () => {
     { name: 'Loja', href: '/marketplace' },
     { name: 'Biblioteca', href: '/library' },
     { name: 'Seja Criador', href: '/creators' },
-    { name: 'Suporte', href: 'https://discord.gg/example', external: true },
+    { name: 'Discord', href: 'https://discord.gg/example', external: true },
   ];
 
   return (
@@ -42,10 +42,11 @@ export const Navbar = () => {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[9px] font-black text-gray-500 hover:text-primary uppercase tracking-[0.3em] transition-all relative group"
+                  className="text-[9px] font-black text-gray-500 hover:text-secondary uppercase tracking-[0.3em] transition-all relative group flex items-center space-x-2"
                 >
+                  {link.name === 'Discord' && <MessageSquare className="w-3 h-3 text-secondary animate-pulse" />}
                   <span className="relative z-10">{link.name}</span>
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-secondary transition-all group-hover:w-full"></span>
                 </a>
               ) : (
                 <Link

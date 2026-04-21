@@ -57,7 +57,8 @@ export const PRODUCT_CATEGORIES = [
   'Shaders & Lightning',
   'AI Solutions',
   'Security Modules',
-  'Automation Bots'
+  'Automation Bots',
+  'Discord Assets'
 ] as const;
 
 export type ProductCategory = typeof PRODUCT_CATEGORIES[number];

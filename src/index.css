@@ -6,6 +6,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-primary: #C1FF00;
   --color-secondary: #00FFD1;
+  --color-cyber: #FF00E5;
   --color-bg: #050505;
   --color-surface: #0F0F0F;
   --color-border: rgba(255, 255, 255, 0.05);
@@ -76,13 +77,17 @@
 
 .scanline {
   width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(193, 255, 0, 0.2), transparent);
-  animation: scan 4s linear infinite;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(193, 255, 0, 0.1), transparent);
+  animation: scan 8s linear infinite;
   position: absolute;
   z-index: 50;
   pointer-events: none;
   left: 0;
+}
+
+.cyber-gradient {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
 }
 
 @keyframes scan {

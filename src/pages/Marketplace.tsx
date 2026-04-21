@@ -4,7 +4,7 @@ import { db } from '../lib/firebase';
 import { Product, PRODUCT_CATEGORIES } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
-import { Search, Filter, ShoppingCart, Tag, User, CheckCircle, CreditCard, X as CloseIcon, ShieldCheck, Activity } from 'lucide-react';
+import { Search, Filter, ShoppingCart, Tag, User, CheckCircle, CreditCard, X as CloseIcon, ShieldCheck, Activity, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { AnimatePresence } from 'motion/react';
@@ -132,8 +132,8 @@ export const Marketplace = () => {
              <Activity className="w-4 h-4 animate-pulse" />
              <span>Rede de Ativos • Protocolo v2.0</span>
           </div>
-          <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter uppercase italic leading-[0.7]">TERMINAL</h1>
-          <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest leading-relaxed max-w-xl">Arquivos técnicos de alta performance. Distribuição autorizada de scripts, UI e frameworks otimizados para Roblox.</p>
+          <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter uppercase italic leading-[0.7] mb-4">MERCADO<br/><span className="text-primary italic-none">PROTOCOLO</span></h1>
+          <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest leading-relaxed max-w-xl">Acesso exclusivo a frameworks, UI Kits e ativos de alta performance auditados pela rede Enzo.</p>
         </div>
 
         <div className="relative w-full md:w-96">
@@ -158,19 +158,36 @@ export const Marketplace = () => {
                 <span>DIRETÓRIO</span>
               </h3>
               
-              <div className="flex flex-col border border-border rounded-[2.5rem] overflow-hidden bg-black/40 backdrop-blur-md">
-                <button
-                   onClick={() => setActiveCategory('all')}
-                   className={cn(
-                     "flex items-center justify-between px-8 py-6 text-[10px] font-black tracking-widest border-b border-border transition-all text-left uppercase",
-                     activeCategory === 'all' ? "bg-primary text-black" : "text-gray-500 hover:bg-white/5"
-                   )}
-                >
-                   <span>SISTEMA COMPLETO</span>
-                   <span className="font-mono text-[9px] opacity-40">{products.length}</span>
-                </button>
+                  <div className="flex flex-col border border-border rounded-[2.5rem] overflow-hidden bg-black/40 backdrop-blur-md tech-grid">
+                    <button
+                      onClick={() => setActiveCategory('all')}
+                      className={cn(
+                        "flex items-center justify-between px-8 py-6 text-[10px] font-black tracking-widest border-b border-border transition-all text-left uppercase",
+                        activeCategory === 'all' ? "bg-white text-black" : "text-gray-500 hover:bg-white/5"
+                      )}
+                    >
+                      <div className="flex items-center space-x-3">
+                         <Activity className="w-3 h-3" />
+                         <span>SISTEMA COMPLETO</span>
+                      </div>
+                      <span className="font-mono text-[9px] opacity-40">{products.length}</span>
+                    </button>
 
-                {PRODUCT_CATEGORIES.map(category => (
+                    <button
+                      onClick={() => setActiveCategory('Discord Assets')}
+                      className={cn(
+                        "flex items-center justify-between px-8 py-6 text-[10px] font-black tracking-widest border-b border-border transition-all text-left uppercase",
+                        activeCategory === 'Discord Assets' ? "bg-secondary text-black" : "text-secondary/60 hover:bg-secondary/5"
+                      )}
+                    >
+                      <div className="flex items-center space-x-3">
+                         <MessageSquare className="w-3 h-3" />
+                         <span>DISCORD ASSETS</span>
+                      </div>
+                      <span className="font-mono text-[9px] opacity-40">{categoryCounts['Discord Assets'] || 0}</span>
+                    </button>
+
+                    {PRODUCT_CATEGORIES.filter(c => c !== 'Discord Assets').map(category => (
                    <button
                      key={category}
                      onClick={() => setActiveCategory(category)}
