@@ -15,8 +15,16 @@
   ],
   "routes": [
     {
+      "src": "/logo.jpg",
+      "dest": "/logo.jpg"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "server.ts"
+      "dest": "/server.ts"
     },
     {
       "handle": "filesystem"
