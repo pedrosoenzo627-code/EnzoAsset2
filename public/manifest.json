@@ -3,14 +3,8 @@
   "name": "Enzo Assets | Roblox Marketplace",
   "icons": [
     {
-      "src": "/logo.jpg",
+      "src": "logo.jpg",
       "type": "image/jpeg",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "https://www.google.com/s2/favicons?domain=roblox.com&sz=192",
-      "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     }

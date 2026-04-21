@@ -56,7 +56,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     try {
       await axios.post(WEBHOOK_URL, {
         username: "Enzo Assets Notificador",
-        avatar_url: "https://enzo-asset2.vercel.app/logo.png",
+        avatar_url: "https://enzo-asset2.vercel.app/logo.jpg",
         embeds: [{
           title: "🚀 Nova Venda Realizada!",
           color: 0xC1FF00,

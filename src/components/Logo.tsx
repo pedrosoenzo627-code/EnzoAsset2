@@ -32,7 +32,7 @@ export const Logo = ({ size = "md", className = "" }: { size?: "sm" | "md" | "lg
           alt="Enzo Assets" 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={(e) => {
-            console.warn("Logo failed to load at /logo.png. Triggering fallback.");
+            console.warn("Logo failed to load at /logo.jpg. Triggering fallback.");
             const el = e.currentTarget;
             el.style.opacity = '0'; // Hide broken image gracefully
             const parent = el.parentElement;
