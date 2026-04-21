@@ -87,3 +87,13 @@ export interface Purchase {
   creatorId: string;
   createdAt: any;
 }
+
+export interface LibraryItem {
+  id: string;
+  source: 'purchase' | 'creation';
+  name: string;
+  imageUrl: string;
+  fileUrl: string;
+  createdAt: any;
+  category: string;
+}

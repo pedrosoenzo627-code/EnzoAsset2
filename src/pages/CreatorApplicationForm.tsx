@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { db, serverTimestamp } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { ShieldCheck, CheckCircle2, FileText, Send, Lock, Rocket, Gamepad2, Users, MessageSquare, Info, Loader2, Activity } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, FileText, Send, Lock, Rocket, Gamepad2, Users, MessageSquare, Info, Loader2, Activity, Fingerprint } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -37,11 +37,11 @@ export const CreatorApplicationForm = () => {
   }, [formData.gameLink]);
 
   const benefits = [
-    "Receita líquida de 90% em todas as transações.",
-    "Engine de distribuição escalável e segura.",
-    "Painel analítico para performance de vendas.",
-    "Curadoria técnica para máxima valorização dos ativos.",
-    "Comunidade privada de desenvolvedores high-tier."
+    "Retenção mínima de rede (90% Profit Share).",
+    "Protocolos de distribuição AAA escaláveis.",
+    "Terminal analítico de vendas em tempo real.",
+    "Exposição prioritária no ecossistema global.",
+    "Acesso ao Canal de Elite (Inner Circle)."
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,29 +65,34 @@ export const CreatorApplicationForm = () => {
     }
   };
 
-  if (authLoading) return <div className="h-screen flex items-center justify-center text-white font-black tracking-widest text-[10px] uppercase">Validando Credenciais...</div>;
+  if (authLoading) return <div className="h-screen flex items-center justify-center text-white font-tech font-black tracking-[0.5em] uppercase animate-pulse">VALIDANDO_ID...</div>;
 
   if (submitted) {
     return (
-      <div className="pt-32 md:pt-40 pb-20 container mx-auto px-4 max-w-2xl text-center min-h-screen flex items-center justify-center">
+      <div className="pt-32 pb-20 container mx-auto px-4 max-w-2xl text-center min-h-screen flex items-center justify-center selection:bg-primary/30">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-900 border border-white/5 p-10 md:p-20 rounded-[2.5rem] md:rounded-[4rem] shadow-[0_0_100px_rgba(34,197,94,0.05)] border-green-500/10"
+          className="glass-morphism border border-primary/20 p-20 rounded-[4rem] relative overflow-hidden tech-grid shadow-[0_0_100px_rgba(193,255,0,0.05)]"
         >
-          <div className="w-20 md:w-24 h-20 md:h-24 bg-green-500/10 text-green-500 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center mx-auto mb-8 md:mb-10 border border-green-500/20 rotate-6">
-            <CheckCircle2 className="w-10 md:w-12 h-10 md:h-12" />
+          <div className="hud-corner hud-corner-tl border-primary"></div>
+          <div className="hud-corner hud-corner-tr border-primary"></div>
+          <div className="hud-corner hud-corner-bl border-primary"></div>
+          <div className="hud-corner hud-corner-br border-primary"></div>
+
+          <div className="w-24 h-24 bg-primary/10 text-primary rounded-[2rem] flex items-center justify-center mx-auto mb-10 border border-primary/20 rotate-6 glow-primary">
+            <CheckCircle2 className="w-12 h-12" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 md:mb-6 tracking-tighter uppercase italic leading-[0.9]">TRANSMISSÃO <br /> RECEBIDA</h2>
-          <p className="text-gray-500 mb-8 md:mb-12 leading-relaxed text-base md:text-lg font-medium">
-            Sua aplicação entrou em nossa fila de curadoria manual. 
-            Você receberá uma diretiva oficial via e-mail em até 48 horas úteis.
+          <h2 className="text-5xl font-display text-white mb-6 tracking-tighter italic uppercase leading-none">TRANSMISSÃO <br /><span className="text-primary">RECEBIDA</span></h2>
+          <p className="text-gray-500 mb-12 leading-relaxed text-[11px] font-tech font-black uppercase tracking-[0.4em] opacity-50">
+            Sua candidatura entrou em fase de auditoria manual. 
+            Diretiva oficial será emitida via e-mail em breve.
           </p>
           <button
             onClick={() => navigate('/')}
-            className="w-full bg-white text-black px-10 md:px-12 py-5 md:py-6 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-all transform active:scale-95 shadow-2xl"
+            className="w-full bg-white text-black py-8 rounded-2xl font-tech font-black text-[10px] tracking-[0.5em] hover:bg-primary transition-all shadow-2xl uppercase"
           >
-            RETORNAR AO HUB
+            RETORNAR_STATUS_HUB
           </button>
         </motion.div>
       </div>
@@ -96,15 +101,17 @@ export const CreatorApplicationForm = () => {
 
   if (profile?.role === 'creator') {
     return (
-      <div className="pt-32 md:pt-40 pb-20 container mx-auto px-4 max-w-2xl text-center min-h-screen flex items-center justify-center">
-        <div className="bg-blue-600/5 border border-blue-600/20 p-10 md:p-20 rounded-[2.5rem] md:rounded-[4rem]">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tighter uppercase italic">VOCÊ JÁ É<br />UM CREATOR</h2>
-          <p className="text-gray-500 mb-8 md:mb-10 text-base md:text-lg font-medium">Acesse seu centro de comando para gerenciar sua frota de assets.</p>
+      <div className="pt-32 pb-20 container mx-auto px-4 max-w-2xl text-center min-h-screen flex items-center justify-center selection:bg-primary/30">
+        <div className="glass-morphism border border-secondary/20 p-20 rounded-[4rem] relative overflow-hidden">
+          <div className="hud-corner hud-corner-tl border-secondary"></div>
+          <div className="hud-corner hud-corner-tr border-secondary"></div>
+          <h2 className="text-5xl font-display text-white mb-8 tracking-tighter italic uppercase leading-none">VOCÊ JÁ É<br /><span className="text-secondary">UM CREATOR</span></h2>
+          <p className="text-gray-500 mb-12 leading-relaxed text-[11px] font-tech font-black uppercase tracking-[0.4em] opacity-50">Seu nó de processamento já está ativo no terminal de criação.</p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="bg-white text-black px-10 md:px-12 py-5 md:py-6 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-white/5 uppercase"
+            className="bg-white text-black px-16 py-8 rounded-2xl font-tech font-black text-[10px] tracking-[0.5em] hover:bg-secondary transition-all shadow-2xl uppercase"
           >
-            Acessar Dashboard
+            ACESSAR_DASH_TERMINAL
           </button>
         </div>
       </div>
@@ -112,71 +119,76 @@ export const CreatorApplicationForm = () => {
   }
 
   return (
-    <div className="pt-32 pb-20 container mx-auto px-4 min-h-screen selection:bg-primary/30 tech-dots relative">
-      <div className="scanline"></div>
+    <div className="pt-32 pb-20 container mx-auto px-4 min-h-screen selection:bg-primary/30 relative">
+      <div className="fixed inset-0 pointer-events-none z-0">
+         <div className="absolute top-[20%] left-0 w-96 h-96 bg-primary/5 blur-[100px] rounded-full"></div>
+         <div className="absolute bottom-[20%] right-0 w-96 h-96 bg-tertiary/5 blur-[100px] rounded-full"></div>
+      </div>
       
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-20">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-24 relative z-10">
         {/* Left Side: Recruitment Manifesto */}
-        <div className="lg:w-1/2 space-y-16">
-          <div className="space-y-6">
-            <div className="inline-flex items-center space-x-3 bg-primary/5 text-primary border border-primary/10 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.4em]">
+        <div className="lg:w-1/2 space-y-20">
+          <div className="space-y-8">
+            <div className="inline-flex items-center space-x-4 bg-primary/5 text-primary border border-primary/20 px-6 py-2.5 rounded-full text-[10px] font-tech font-black uppercase tracking-[0.4em] glow-primary">
               <ShieldCheck className="w-5 h-5 animate-pulse" />
-              <span>PROTOCOLO DE RECRUTAMENTO v.25</span>
+              <span>RECRUTAMENTO_V_8.4 • PROTOCOLO_FORJA</span>
             </div>
-            <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.7] uppercase italic">
-              JUNTE-SE <span className="text-primary italic-none">À ELITE.</span>
+            <h1 className="text-7xl md:text-[8rem] font-display text-white tracking-tighter leading-[0.8] uppercase italic">
+              JUNTE-SE <br/><span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-tertiary bg-[length:200%_auto] animate-[gradient_8s_linear_infinite]">À ELITE.</span>
             </h1>
-            <p className="text-gray-500 text-lg md:text-xl font-mono leading-relaxed max-w-md uppercase tracking-tight">
-              A elite dos arquitetos digitais está aqui. Buscamos mentes capazes de distorcer a realidade do Roblox.
+            <p className="text-gray-500 text-base md:text-xl font-tech leading-relaxed max-w-sm uppercase tracking-tight opacity-50">
+              Buscamos arquitetos que operam na borda da realidade digital. Sua criatividade é o nosso combustível.
             </p>
           </div>
 
-          <div className="space-y-8">
-            <h3 className="text-[10px] font-black text-gray-700 uppercase tracking-[0.4em] mb-8">VANTAGENS_OPERACIONAIS</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-12">
+            <h3 className="text-[10px] font-tech font-black text-gray-700 uppercase tracking-[0.6em] mb-12">VANTAGENS_DO_SISTEMA</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {benefits.map((benefit, i) => (
                 <motion.div 
                   key={i} 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-surface border border-border p-6 rounded-[2rem] group hover:border-primary/20 transition-all tech-grid"
+                  whileHover={{ y: -5 }}
+                  className="glass-morphism border border-white/5 p-8 rounded-[2rem] group hover:border-quaternary/30 transition-all tech-grid"
                 >
-                  <div className="w-10 h-10 bg-black rounded-xl border border-border flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-black transition-all">
-                    <CheckCircle2 className="w-5 h-5" />
+                  <div className="w-12 h-12 bg-black rounded-2xl border border-white/5 flex items-center justify-center mb-6 group-hover:bg-quaternary group-hover:text-black transition-all glow-yellow">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-relaxed group-hover:text-white transition-colors">{benefit}</p>
+                  <p className="text-[10px] font-tech font-black uppercase tracking-widest text-gray-600 leading-relaxed group-hover:text-white transition-colors">{benefit}</p>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          <div className="p-10 rounded-[3rem] bg-surface border border-border relative overflow-hidden group">
-             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
-                <Rocket className="w-32 h-32 text-primary" />
+          <div className="p-12 rounded-[2.5rem] glass-morphism border border-white/5 relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
+                <Rocket className="w-40 h-40 text-primary" />
              </div>
-             <h4 className="text-white font-black text-[10px] tracking-widest uppercase mb-4">REQUISITO MÍNIMO</h4>
-             <p className="text-gray-600 font-mono text-[10px] leading-relaxed uppercase font-black tracking-widest max-w-sm">Você deve possuir um portfólio verificável e pelo menos um ativo de alta complexidade em produção.</p>
+             <h4 className="text-white font-tech font-black text-[10px] tracking-widest uppercase mb-4">REQUISITO_HASH_MIN</h4>
+             <p className="text-gray-700 font-tech text-[10px] leading-relaxed uppercase font-black tracking-widest max-w-sm">Você deve possuir um portfólio verificável de ativos AAA já implementados em escala.</p>
           </div>
         </div>
 
-        {/* Right Side: High-End Application Form */}
+        {/* Right Side: Form */}
         <div className="lg:w-1/2">
           {!user ? (
-            <div className="bg-surface border border-border p-20 rounded-[4rem] text-center flex flex-col items-center justify-center space-y-10 shadow-2xl relative overflow-hidden">
-              <div className="scanline"></div>
-              <div className="w-24 h-24 bg-black rounded-[2rem] flex items-center justify-center border border-border rotate-6 group hover:rotate-0 transition-transform duration-500 shadow-[0_0_50px_rgba(193,255,0,0.05)]">
-                 <Lock className="w-10 h-10 text-gray-600" />
+            <div className="glass-morphism border border-white/5 p-24 rounded-[4rem] text-center flex flex-col items-center justify-center space-y-12 shadow-2xl relative overflow-hidden min-h-[600px]">
+              <div className="hud-corner hud-corner-tl"></div>
+              <div className="hud-corner hud-corner-br"></div>
+              <div className="w-28 h-28 bg-black rounded-[2.5rem] flex items-center justify-center border border-white/5 rotate-6 group hover:rotate-0 transition-all duration-500 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                 <Lock className="w-12 h-12 text-gray-800" />
               </div>
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">TERMINAL BLOQUEADO</h2>
-                <p className="text-gray-600 font-black text-[10px] tracking-widest uppercase max-w-xs mx-auto">É necessário autenticação biométrica/digital para acessar o protocolo de recruta.</p>
+              <div className="space-y-6">
+                <h2 className="text-5xl font-display text-white uppercase italic tracking-tighter leading-none">CANAL_BLOQUEADO</h2>
+                <p className="text-gray-700 font-tech font-black text-[11px] tracking-[0.4em] uppercase max-w-xs mx-auto">Requer autenticação de identidade para acessar o dossiê de recruta.</p>
               </div>
               <button 
                 onClick={() => navigate('/login')}
-                className="bg-primary text-black px-16 py-6 rounded-2xl font-black text-[10px] tracking-[0.3em] hover:bg-white transition-all transform active:scale-95 shadow-2xl uppercase"
+                className="bg-primary text-black px-20 py-8 rounded-2xl font-tech font-black text-[10px] tracking-[0.5em] hover:bg-white transition-all transform active:scale-95 shadow-2xl uppercase"
               >
-                AUTENTICAR AGORA
+                AUTENTICAR_SESSÃO
               </button>
             </div>
           ) : (
@@ -184,36 +196,38 @@ export const CreatorApplicationForm = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onSubmit={handleSubmit}
-              className="bg-surface border border-border p-2 md:p-16 rounded-[4rem] shadow-2xl relative overflow-hidden flex flex-col gap-2"
+              className="glass-morphism border border-white/5 p-2 md:p-16 rounded-[4rem] shadow-2xl relative overflow-hidden flex flex-col gap-2 bg-black/40"
             >
-              <div className="scanline"></div>
-              <div className="p-10 md:p-14 space-y-10">
-                <div className="flex items-center space-x-3 text-primary font-black text-[10px] tracking-[0.3em] uppercase mb-10">
-                  <FileText className="w-6 h-6" />
-                  <span>DOSSIÊ DE CANDIDATURA</span>
+              <div className="hud-corner hud-corner-tl"></div>
+              <div className="hud-corner hud-corner-br"></div>
+              
+              <div className="p-10 md:p-14 space-y-12">
+                <div className="flex items-center space-x-4 text-quinary font-tech font-black text-[10px] tracking-[0.5em] uppercase mb-12 glow-blue">
+                  <FileText className="w-8 h-8" />
+                  <span>DOSSIÊ DE INGRESSO_DATA</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">PORTFOLIO_URL</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-4">
+                    <label className="text-[9px] font-tech font-black text-gray-700 uppercase tracking-widest ml-4 block">LINK_PORTFOLIO</label>
                     <input
                       required
                       type="url"
-                      placeholder="Link do seu trabalho..."
-                      className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 transition-all uppercase placeholder:text-gray-900 text-xs shadow-inner"
+                      placeholder="HTTPS://CARGA..."
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-white font-tech font-bold focus:outline-none focus:border-quinary/40 transition-all uppercase placeholder:text-gray-900 text-xs shadow-inner"
                       value={formData.portfolioUrl}
                       onChange={e => setFormData({ ...formData, portfolioUrl: e.target.value })}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">ASSET_MOCKUP</label>
+                  <div className="space-y-4">
+                    <label className="text-[9px] font-tech font-black text-gray-700 uppercase tracking-widest ml-4 block">ASSET_MOCKUP_ID</label>
                     <div className="relative">
                       <input
                         required
                         type="url"
-                        placeholder="Link do ativo..."
-                        className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 transition-all uppercase placeholder:text-gray-900 text-xs shadow-inner"
+                        placeholder="ROBLOX.COM/GAMES/..."
+                        className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-white font-tech font-bold focus:outline-none focus:border-quinary/40 transition-all uppercase placeholder:text-gray-900 text-xs shadow-inner"
                         value={formData.gameLink}
                         onChange={e => setFormData({ ...formData, gameLink: e.target.value })}
                       />
@@ -222,10 +236,10 @@ export const CreatorApplicationForm = () => {
                           <motion.div 
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2 text-[8px] text-primary font-black uppercase tracking-widest"
+                            className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center space-x-3 text-[9px] text-primary font-tech font-black uppercase tracking-widest"
                           >
-                             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                            <span>VERIFIED</span>
+                             <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_#C1FF00]"></div>
+                             <span>SNC_VIFD</span>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -233,84 +247,73 @@ export const CreatorApplicationForm = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">MANIFESTO_OPERACIONAL</label>
+                <div className="space-y-4">
+                  <label className="text-[9px] font-tech font-black text-gray-700 uppercase tracking-widest ml-4 block">MOD_MANIFESTO</label>
                   <textarea
                     required
                     rows={2}
-                    className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 transition-all resize-none placeholder:text-gray-900 text-xs shadow-inner uppercase"
-                    placeholder="Por que você merece este assento?"
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-white font-tech font-bold focus:outline-none focus:border-quinary/40 transition-all resize-none placeholder:text-gray-900 text-xs shadow-inner uppercase"
+                    placeholder="Motive sua entrada na rede elite..."
                     value={formData.whyUs}
                     onChange={e => setFormData({ ...formData, whyUs: e.target.value })}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">ARQUIVOS_HISTORICOS</label>
-                  <textarea
-                    required
-                    rows={2}
-                    placeholder="Quais sistemas você já construiu?"
-                    className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 transition-all resize-none placeholder:text-gray-900 text-xs shadow-inner uppercase"
-                    value={formData.pastWork}
-                    onChange={e => setFormData({ ...formData, pastWork: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">IDENTIDADE_DISCORD</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-4">
+                    <label className="text-[9px] font-tech font-black text-gray-700 uppercase tracking-widest ml-4 block">DISCORD_ID</label>
                     <input
                       required
                       type="text"
-                      placeholder="Username#0000"
-                      className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 transition-all placeholder:text-gray-900 text-xs shadow-inner uppercase"
+                      placeholder="USERNAME"
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-white font-tech font-bold focus:outline-none focus:border-quinary/40 transition-all placeholder:text-gray-900 text-xs shadow-inner uppercase"
                       value={formData.discordTag}
                       onChange={e => setFormData({ ...formData, discordTag: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-700 uppercase tracking-widest ml-2 block">ESPECIALIDADE_LEVEL</label>
+                  <div className="space-y-4">
+                    <label className="text-[9px] font-tech font-black text-gray-700 uppercase tracking-widest ml-4 block">FORGE_SPEC</label>
                     <select
-                      className="w-full bg-black/50 border border-border rounded-2xl px-6 py-5 text-white font-bold focus:outline-none focus:border-primary/30 appearance-none uppercase text-xs shadow-inner cursor-pointer"
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-white font-tech font-bold focus:outline-none focus:border-quinary/40 appearance-none uppercase text-xs shadow-inner cursor-pointer"
                       value={formData.specialty}
                       onChange={e => setFormData({ ...formData, specialty: e.target.value })}
                     >
-                      <option value="UI" className="bg-surface">ARQUITETO UI</option>
-                      <option value="Scripting" className="bg-surface">LOGIC SCRIPTER</option>
-                      <option value="Modeling" className="bg-surface">3D MODELER</option>
-                      <option value="VFX" className="bg-surface">VFX ARTIST</option>
-                      <option value="All" className="bg-surface">FULLSTACK ELITE</option>
+                      <option value="UI" className="bg-bg">ARQUITETO UI</option>
+                      <option value="Scripting" className="bg-bg">LOGIC SCRIPTER</option>
+                      <option value="Modeling" className="bg-bg">3D MODELER</option>
+                      <option value="VFX" className="bg-bg">VFX ARTIST</option>
+                      <option value="All" className="bg-bg">FULLSTACK ELITE</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4 p-8 bg-black/50 border border-border rounded-[2rem] group cursor-pointer" onClick={() => setFormData({ ...formData, benefitsAccepted: !formData.benefitsAccepted })}>
+                <div className="flex items-center space-x-6 p-8 bg-black/60 border border-white/5 rounded-[2rem] group cursor-pointer" onClick={() => setFormData({ ...formData, benefitsAccepted: !formData.benefitsAccepted })}>
                   <div className={cn(
-                    "w-8 h-8 rounded-xl border flex items-center justify-center transition-all shrink-0",
-                    formData.benefitsAccepted ? "bg-primary border-primary text-black" : "border-border text-transparent"
+                    "w-10 h-10 rounded-xl border flex items-center justify-center transition-all shrink-0",
+                    formData.benefitsAccepted ? "bg-primary border-primary text-black" : "border-white/10 text-transparent"
                   )}>
-                    <CheckCircle2 className="w-5 h-5" />
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest group-hover:text-white transition-colors">
-                    ACEITO RETENÇÃO DE <span className="text-primary italic font-black">10%</span> SOBRE VENDAS
+                  <span className="text-[10px] text-gray-600 font-tech font-black uppercase tracking-[0.3em] group-hover:text-white transition-colors">
+                    ACEITO RETENÇÃO DE <span className="text-primary italic font-black">10%</span> SOBRE FLUXO_MARKET
                   </span>
                 </div>
 
                 <button
                   disabled={loading || !formData.benefitsAccepted}
-                  className="w-full bg-primary text-black py-7 rounded-[2rem] font-black text-[10px] tracking-[0.3em] flex items-center justify-center space-x-4 transition-all disabled:opacity-30 shadow-2xl active:scale-95 group"
+                  className="w-full bg-white text-black py-8 rounded-[2rem] font-tech font-black text-[11px] tracking-[0.5em] flex items-center justify-center space-x-6 transition-all disabled:opacity-30 shadow-2xl active:scale-95 group relative overflow-hidden"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-tertiary opacity-0 group-hover:opacity-10 transition-opacity"></div>
                   {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-black" />
+                    <Loader2 className="w-8 h-8 animate-spin text-black" />
                   ) : (
                     <>
-                      <span>TRANSMITIR CANDIDATURA</span>
-                      <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      <span>TRANSMITIR_CANDIDATURA</span>
+                      <Send className="w-6 h-6 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
                     </>
                   )}
                 </button>
-                <p className="text-center text-[8px] text-gray-800 font-black tracking-[0.4em] uppercase">Encriptação de Grau Militar v2.0</p>
+                <p className="text-center text-[9px] text-gray-800 font-tech font-black tracking-[0.5em] uppercase opacity-40">CRIPTOGRAFIA_BIO_IDENT_V8.2</p>
               </div>
             </motion.form>
           )}

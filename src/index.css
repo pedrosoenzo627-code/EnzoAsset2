@@ -6,12 +6,45 @@
   --font-tech: "Space Grotesk", sans-serif;
   --font-display: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --color-primary: #C1FF00;
-  --color-secondary: #00FFD1;
-  --color-cyber: #FF00E5;
-  --color-bg: #050505;
-  --color-surface: #0F0F0F;
-  --color-border: rgba(255, 255, 255, 0.05);
+  --color-primary: #C1FF00; /* Cyber Green */
+  --color-secondary: #00FFD1; /* Electric Cyan */
+  --color-tertiary: #FF00E5; /* Neon Pink */
+  --color-quaternary: #FFF500; /* Volt Yellow */
+  --color-quinary: #2E5BFF; /* Cobalt Blue */
+  --color-senary: #7000FF; /* Hyper Purple */
+  --color-septenary: #FF3D00; /* Infrared Red */
+  --color-octonary: #FF8A00; /* Orange Flare */
+  --color-bg: #030303;
+  --color-surface: #080808;
+  --color-border: rgba(255, 255, 255, 0.03);
+}
+
+@layer utilities {
+  .glitch-text {
+    position: relative;
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                 -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                 0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    animation: glitch 500ms infinite;
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+
+  .glow-red { box-shadow: 0 0 20px rgba(255, 61, 0, 0.3); }
+  .glow-blue { box-shadow: 0 0 20px rgba(46, 91, 255, 0.3); }
+  .glow-purple { box-shadow: 0 0 20px rgba(112, 0, 255, 0.3); }
+  .glow-yellow { box-shadow: 0 0 20px rgba(255, 245, 0, 0.3); }
+  
+  .border-gradient-8 {
+    border-image: linear-gradient(to right, #C1FF00, #00FFD1, #FF00E5, #FFF500, #2E5BFF, #7000FF, #FF3D00, #FF8A00) 1;
+  }
 }
 
 @layer base {
@@ -104,11 +137,11 @@
 }
 
 .cyber-text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-cyber;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-tertiary;
 }
 
 .glass-morphism {
-  @apply bg-white/[0.02] backdrop-blur-3xl border border-white/5;
+  @apply bg-white/[0.01] backdrop-blur-[40px] border border-white/[0.05];
 }
 
 @keyframes scan {
