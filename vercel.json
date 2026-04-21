@@ -15,22 +15,6 @@
   ],
   "routes": [
     {
-      "src": "/logo-192.png",
-      "dest": "/logo-192.png"
-    },
-    {
-      "src": "/logo-512.png",
-      "dest": "/logo-512.png"
-    },
-    {
-      "src": "/logo.jpg",
-      "dest": "/logo.jpg"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/server.ts"
     },
