@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "creator", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "CreatorApplication": {
+      "title": "Creator Application",
+      "description": "Form submitted by users to become creators",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "portfolioUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "benefitsAccepted": { "type": "boolean" },
+        "experience": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "status", "benefitsAccepted"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Roblox Asset product details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "creatorName": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "slug": { "type": "string" }
+      },
+      "required": ["name", "price", "category", "creatorId", "fileUrl"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Creator withdrawal request",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "completed", "rejected"] },
+        "method": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "status", "method", "details"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "User purchase record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "price": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "productId", "price"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User storage"
+    },
+    "/applications/{applicationId}": {
+      "schema": "CreatorApplication",
+      "description": "Pending and past applications for creator status"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Marketplace products"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": "Withdrawal",
+      "description": "Payout requests"
+    },
+    "/purchases/{purchaseId}": {
+      "schema": "Purchase",
+      "description": "Transaction records"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-primary: #C1FF00;
+  --color-secondary: #00FFD1;
+  --color-bg: #050505;
+  --color-surface: #0F0F0F;
+  --color-border: rgba(255, 255, 255, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-white antialiased selection:bg-primary/30 selection:text-primary;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full;
+}
+
+.markdown-body {
+  @apply text-gray-300 leading-relaxed text-xs uppercase tracking-tight;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  @apply text-white font-black tracking-tighter mb-4 first:mt-0 mt-8 italic uppercase;
+}
+
+.markdown-body h1 { @apply text-2xl; }
+.markdown-body h2 { @apply text-xl; }
+.markdown-body h3 { @apply text-lg; }
+
+.markdown-body p {
+  @apply mb-4 font-medium opacity-80;
+}
+
+.markdown-body pre {
+  @apply bg-black/50 border border-white/10 rounded-2xl p-6 mb-6 overflow-x-auto;
+}
+
+.markdown-body code {
+  @apply font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md;
+}
+
+.markdown-body pre code {
+  @apply text-gray-200 bg-transparent p-0 text-[10px] leading-relaxed;
+}
+
+.markdown-body ul, .markdown-body ol {
+  @apply mb-6 ml-6 space-y-2 list-disc;
+}
+
+/* Technical UI Enhancements */
+.tech-grid {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.tech-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.scanline {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(193, 255, 0, 0.2), transparent);
+  animation: scan 4s linear infinite;
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+  left: 0;
+}
+
+@keyframes scan {
+  from { top: -100px; }
+  to { top: 120%; }
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(193, 255, 0, 0.2);
+}
+
