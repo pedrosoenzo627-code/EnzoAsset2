@@ -52,7 +52,7 @@ export const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="text-[9px] font-black text-gray-500 hover:text-primary uppercase tracking-[0.3em] transition-all relative group"
+                  className="text-[10px] font-tech font-bold text-gray-500 hover:text-primary uppercase tracking-[0.4em] transition-all relative group"
                 >
                   <span className="relative z-10">{link.name}</span>
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all group-hover:w-full"></span>

@@ -1,43 +1,114 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { Purchase } from '../types';
-import { Library, Download, Package, ExternalLink, ShieldCheck, Loader2 } from 'lucide-react';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { Purchase, Product } from '../types';
+import { Library, Download, Package, ExternalLink, ShieldCheck, Loader2, Award } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
+// Unified type for library display
+interface LibraryItem {
+  id: string;
+  name: string;
+  image: string;
+  fileUrl: string;
+  date: any;
+  type: 'purchase' | 'creation';
+  category?: string;
+}
+
 export const MyLibrary = () => {
   const { user, loading: authLoading, signIn } = useAuth();
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPurchases = async () => {
-      if (!user) return;
-      setLoading(true);
-      try {
-        const q = query(
-          collection(db, 'purchases'), 
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const snapshot = await getDocs(q);
-        const list = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Purchase[];
-        setPurchases(list);
-      } catch (error) {
-        console.error("Error fetching library:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (!user) {
+      if (!authLoading) setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    // 1. Listen to Purchases
+    const qPurchases = query(
+      collection(db, 'purchases'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+
+    // 2. Listen to Created Products
+    const qCreated = query(
+      collection(db, 'products'),
+      where('creatorId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+
+    let purchasesList: LibraryItem[] = [];
+    let createdList: LibraryItem[] = [];
+
+    const updateLibrary = () => {
+      const combined = [...purchasesList, ...createdList];
+      // Remove duplicates if a creator bought their own product (rare but possible)
+      const unique = combined.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id || (item.type === 'purchase' && current.type === 'creation' && item.name === current.name));
+        if (!x) return acc.concat([current]);
+        return acc;
+      }, [] as LibraryItem[]);
+
+      // Sort by date (descending)
+      unique.sort((a, b) => {
+        const dateA = a.date?.seconds || 0;
+        const dateB = b.date?.seconds || 0;
+        return dateB - dateA;
+      });
+
+      setItems(unique);
+      setLoading(false);
     };
 
-    if (user) fetchPurchases();
-    else if (!authLoading) setLoading(false);
+    const unsubPurchases = onSnapshot(qPurchases, (snapshot) => {
+      purchasesList = snapshot.docs.map(doc => {
+        const data = doc.data() as Purchase;
+        return {
+          id: doc.id,
+          name: data.productName,
+          image: data.productImage,
+          fileUrl: data.fileUrl,
+          date: data.createdAt,
+          type: 'purchase'
+        };
+      });
+      updateLibrary();
+    }, (error) => {
+      console.error("Error listening to purchases:", error);
+      setLoading(false);
+    });
+
+    const unsubCreated = onSnapshot(qCreated, (snapshot) => {
+      createdList = snapshot.docs.map(doc => {
+        const data = doc.data() as Product;
+        return {
+          id: doc.id,
+          name: data.name,
+          image: data.imageUrl,
+          fileUrl: data.fileUrl,
+          date: data.createdAt,
+          type: 'creation',
+          category: data.category
+        };
+      });
+      updateLibrary();
+    }, (error) => {
+      console.error("Error listening to created products:", error);
+    });
+
+    return () => {
+      unsubPurchases();
+      unsubCreated();
+    };
   }, [user, authLoading]);
 
   if (authLoading) return <div className="h-screen flex items-center justify-center text-white font-black tracking-widest text-xs uppercase animate-pulse">Carregando...</div>;
@@ -86,7 +157,7 @@ export const MyLibrary = () => {
         <div className="bg-surface border border-border p-8 rounded-[3rem] flex items-center space-x-8 group hover:border-primary/20 transition-all tech-grid">
            <div className="text-right">
               <span className="text-[9px] font-black text-gray-700 uppercase block tracking-[0.3em] mb-1">REGISTROS</span>
-              <span className="text-3xl font-black text-white tracking-tighter italic uppercase">{purchases.length} PROTOCOLOS</span>
+              <span className="text-3xl font-black text-white tracking-tighter italic uppercase">{items.length} PROTOCOLOS</span>
            </div>
            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center text-primary border border-border rotate-6 group-hover:rotate-0 transition-all">
               <Package className="w-8 h-8" />
@@ -97,10 +168,10 @@ export const MyLibrary = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {loading ? (
           [1, 2, 3].map(i => <div key={i} className="h-[30rem] bg-surface animate-pulse rounded-[3.5rem] border border-border"></div>)
-        ) : purchases.length > 0 ? (
-          purchases.map((item, i) => (
+        ) : items.length > 0 ? (
+          items.map((item, i) => (
             <motion.div
-              key={item.id}
+              key={item.id + item.type}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
@@ -108,15 +179,23 @@ export const MyLibrary = () => {
             >
               <div className="aspect-[4/3] relative rounded-[3rem] overflow-hidden bg-black mb-4">
                 <img 
-                  src={item.productImage || 'https://picsum.photos/seed/roblox/800/600'} 
-                  alt={item.productName} 
+                  src={item.image || 'https://picsum.photos/seed/roblox/800/600'} 
+                  alt={item.name} 
                   className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                   <div className={cn(
+                     "px-3 py-1.5 rounded-xl text-[8px] font-black border tracking-[0.3em] uppercase w-fit flex items-center space-x-2",
+                     item.type === 'creation' ? "bg-secondary/20 text-secondary border-secondary/20" : "bg-primary/20 text-primary border-primary/20"
+                   )}>
+                      {item.type === 'creation' ? <Award className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+                      <span>{item.type === 'creation' ? 'OWNER_ASSET' : 'VERIFIED_PROTOCOL'}</span>
+                   </div>
+                </div>
                 <div className="absolute bottom-8 left-8 right-8">
-                   <div className="bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[8px] font-black text-primary border border-primary/20 tracking-[0.3em] uppercase w-fit mb-4">VERIFIED_PROTOCOL</div>
-                   <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">{item.productName}</h3>
+                   <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">{item.name}</h3>
                 </div>
               </div>
 
@@ -125,14 +204,19 @@ export const MyLibrary = () => {
                    <div>
                       <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest block mb-2">SINC_DATA</span>
                       <span className="text-[10px] text-white font-black uppercase tracking-tight">
-                        {item.createdAt?.seconds 
-                          ? new Date(item.createdAt.seconds * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) 
+                        {item.date?.seconds 
+                          ? new Date(item.date.seconds * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) 
                           : 'INSTANT_SYNC'}
                       </span>
                    </div>
                    <div className="text-right">
-                      <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest block mb-1">STATUS</span>
-                      <span className="text-primary text-[9px] font-black uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">LIFETIME</span>
+                      <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest block mb-1">ORIGEM</span>
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border",
+                        item.type === 'creation' ? "text-secondary bg-secondary/10 border-secondary/20" : "text-primary bg-primary/10 border-primary/20"
+                      )}>
+                        {item.type === 'creation' ? 'CRIADO' : 'ADQUIRIDO'}
+                      </span>
                    </div>
                 </div>
 
@@ -141,7 +225,10 @@ export const MyLibrary = () => {
                      href={item.fileUrl} 
                      target="_blank" 
                      rel="noopener noreferrer"
-                     className="w-full bg-primary text-black py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] flex items-center justify-center space-x-3 hover:bg-white transition-all transform active:scale-95 shadow-xl uppercase"
+                     className={cn(
+                       "w-full py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] flex items-center justify-center space-x-3 transition-all transform active:scale-95 shadow-xl uppercase px-4 text-center",
+                       item.type === 'creation' ? "bg-secondary text-black hover:bg-white" : "bg-primary text-black hover:bg-white"
+                     )}
                    >
                      <Download className="w-5 h-5" />
                      <span>DESCARREGAR PROTOCOLO</span>

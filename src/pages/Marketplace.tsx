@@ -132,8 +132,15 @@ export const Marketplace = () => {
              <Activity className="w-4 h-4 animate-pulse" />
              <span>Rede de Ativos • Protocolo v2.0</span>
           </div>
-          <h1 className="text-6xl md:text-9xl font-black text-white tracking-tighter uppercase italic leading-[0.7] mb-4">MERCADO<br/><span className="text-primary italic-none">PROTOCOLO</span></h1>
-          <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest leading-relaxed max-w-xl">Acesso exclusivo a frameworks, UI Kits e ativos de alta performance auditados pela rede Enzo.</p>
+          <h1 className="text-7xl md:text-[12rem] font-display text-white tracking-tighter leading-[0.8] mb-6 relative">
+            MERCADO<br/>
+            <span className="cyber-text-gradient italic ml-0 md:ml-12">PROTOCOLO</span>
+            <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/20 blur-[100px] pointer-events-none"></div>
+          </h1>
+          <p className="text-gray-500 font-tech text-[11px] uppercase tracking-[0.2em] leading-relaxed max-w-xl opacity-70">
+            Acesso exclusivo a frameworks, UI Kits e ativos de alta performance<br/>
+            auditados pela rede <span className="text-white">Enzo Assets</span>.
+          </p>
         </div>
 
         <div className="relative w-full md:w-96">
@@ -229,9 +236,14 @@ export const Marketplace = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group relative bg-surface border border-border rounded-[3.5rem] overflow-hidden hover:border-primary/20 transition-all flex flex-col p-2"
+                  className="group relative glass-morphism rounded-[3.5rem] overflow-hidden hover:border-primary/40 transition-all duration-500 flex flex-col p-3 hover:translate-y-[-8px] hover:shadow-[0_20px_50px_rgba(193,255,0,0.1)]"
                 >
-                  <div className="relative aspect-[4/3] rounded-[3rem] overflow-hidden bg-black mb-6">
+                  <div className="hud-corner hud-corner-tl"></div>
+                  <div className="hud-corner hud-corner-tr"></div>
+                  <div className="hud-corner hud-corner-bl"></div>
+                  <div className="hud-corner hud-corner-br"></div>
+
+                  <div className="relative aspect-[4/3] rounded-[2.8rem] overflow-hidden bg-black mb-6">
                      <img
                        src={product.imageUrl || `https://picsum.photos/seed/${product.id}/800/1000`}
                        alt={product.name}
@@ -254,8 +266,8 @@ export const Marketplace = () => {
                         </div>
                         <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{product.creatorName}</span>
                      </div>
-                     <h3 className="text-3xl font-black text-white tracking-tighter mb-4 line-clamp-1 uppercase italic">{product.name}</h3>
-                     <p className="text-gray-500 font-medium leading-relaxed mb-10 line-clamp-2 text-sm">
+                     <h3 className="text-3xl font-display text-white tracking-tighter mb-4 line-clamp-1 italic">{product.name}</h3>
+                     <p className="text-gray-500 font-tech leading-relaxed mb-10 line-clamp-2 text-xs tracking-tight uppercase opacity-60">
                         {product.description}
                      </p>
 

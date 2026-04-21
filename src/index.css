@@ -1,8 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-tech: "Space Grotesk", sans-serif;
+  --font-display: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-primary: #C1FF00;
   --color-secondary: #00FFD1;
@@ -65,37 +67,60 @@
 /* Technical UI Enhancements */
 .tech-grid {
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 
-.tech-dots {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
+.noise-overlay {
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(170%) brightness(1000%);
+  opacity: 0.03;
+  pointer-events: none;
 }
+
+.hud-corner {
+  @apply absolute w-4 h-4 border-primary/40 pointer-events-none;
+}
+
+.hud-corner-tl { @apply top-6 left-6 border-t-2 border-l-2; }
+.hud-corner-tr { @apply top-6 right-6 border-t-2 border-r-2; }
+.hud-corner-bl { @apply bottom-6 left-6 border-b-2 border-l-2; }
+.hud-corner-br { @apply bottom-6 right-6 border-b-2 border-r-2; }
 
 .scanline {
   width: 100%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(193, 255, 0, 0.1), transparent);
-  animation: scan 8s linear infinite;
-  position: absolute;
-  z-index: 50;
+  background: linear-gradient(to right, transparent, rgba(193, 255, 0, 0.05), transparent);
+  animation: scan 10s linear infinite;
+  position: fixed;
+  z-index: 999;
   pointer-events: none;
   left: 0;
 }
 
 .cyber-gradient {
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+}
+
+.cyber-text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-cyber;
+}
+
+.glass-morphism {
+  @apply bg-white/[0.02] backdrop-blur-3xl border border-white/5;
 }
 
 @keyframes scan {
-  from { top: -100px; }
-  to { top: 120%; }
+  from { top: -100vh; }
+  to { top: 100vh; }
 }
 
 .glow-primary {
-  box-shadow: 0 0 20px rgba(193, 255, 0, 0.2);
+  box-shadow: 0 0 30px rgba(193, 255, 0, 0.1);
+}
+
+.glow-cyber {
+  box-shadow: 0 0 30px rgba(255, 0, 229, 0.15);
 }
 
