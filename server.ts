@@ -157,8 +157,8 @@ async function startServer() {
           amount: product.price.toString(),
         },
         mode: "payment",
-        success_url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/library?success=true`,
-        cancel_url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/marketplace?canceled=true`,
+        success_url: `${process.env.VITE_APP_URL || "https://enzo-asset2.vercel.app"}/marketplace?success=true`,
+        cancel_url: `${process.env.VITE_APP_URL || "https://enzo-asset2.vercel.app"}/marketplace?canceled=true`,
       };
 
       let session;
