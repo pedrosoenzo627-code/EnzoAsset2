@@ -17,6 +17,22 @@ export const Marketplace = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [checkoutStep, setCheckoutStep] = useState<'idle' | 'confirm' | 'success'>('idle');
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      setCheckoutStep('success');
+      // Set a fake selected product if none to show success UI
+      if (!selectedProduct) {
+        setSelectedProduct({ name: 'Aquisição Sincronizada' } as any);
+      }
+      // Clean URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (params.get('canceled') === 'true') {
+      alert('Pagamento cancelado ou interrompido.');
+    }
+  }, []);
+
   const categoryCounts = PRODUCT_CATEGORIES.reduce((acc, cat) => {
     acc[cat] = products.filter(p => p.category === cat).length;
     return acc;
@@ -60,12 +76,18 @@ export const Marketplace = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Falha ao iniciar checkout');
+        const errData = await response.json();
+        throw new Error(errData.detail || errData.error || 'Falha ao iniciar checkout');
       }
 
       const data = await response.json();
       if (data.url) {
-        window.location.href = data.url;
+        // Essential: window.top.location for iframe breakout
+        try {
+          window.top!.location.href = data.url;
+        } catch (e) {
+          window.location.href = data.url;
+        }
       }
     } catch (error: any) {
       console.error("Stripe error:", error);

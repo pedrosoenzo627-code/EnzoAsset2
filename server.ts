@@ -15,9 +15,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
+const stripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder";
+const stripe = new Stripe(stripeKey, {
   apiVersion: "2024-12-18.acacia" as any,
 });
+
+console.log(`[STRIPE] Initialized in ${stripeKey.startsWith('sk_live') ? 'LIVE (REAL MONEY)' : 'TEST'} mode.`);
 
 // Initialize Firebase Admin (Optional: requires service account)
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -72,13 +75,36 @@ async function startServer() {
         return res.json({ received: true });
       }
 
-      if (admin.apps.length === 0) {
-        console.error("[FIREBASE ADMIN] Admin SDK not initialized. Missing FIREBASE_SERVICE_ACCOUNT environment variable?");
-        return res.status(500).json({ error: "Server infrastructure not fully configured." });
-      }
-        const { userId, productId, amount, creatorId } = metadata;
-        const db = admin.firestore();
+      const { userId, productId, productName, amount, creatorId } = metadata;
+      const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
+      // 1. DISCORD LOGIC (Attempt even if Admin fails)
+      if (WEBHOOK_URL) {
+        try {
+          await axios.post(WEBHOOK_URL, {
+            username: "Enzo Assets Notificador",
+            avatar_url: "https://enzo-asset2.vercel.app/logo.png",
+            embeds: [{
+              title: "🚀 Nova Venda Realizada!",
+              color: 0xC1FF00,
+              fields: [
+                { name: "📦 Produto", value: productName || "Asset Digital", inline: true },
+                { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
+                { name: "👤 Comprador", value: session.customer_details?.email || "Cliente", inline: false }
+              ],
+              footer: { text: "Enzo Assets - O melhor para seu jogo" },
+              timestamp: new Date()
+            }]
+          });
+          console.log(`[DISCORD] Aviso de venda enviado: ${productName}`);
+        } catch (discordError) {
+          console.error("[DISCORD] Erro ao enviar aviso:", discordError);
+        }
+      }
+
+      // 2. FIREBASE LOGIC
+      if (admin.apps.length > 0) {
+        const db = admin.firestore();
         try {
           // Fetch product data to store alongside the purchase
           const productDoc = await db.collection("products").doc(productId).get();
@@ -88,7 +114,7 @@ async function startServer() {
             throw new Error(`Product ${productId} not found in database.`);
           }
 
-          // 1. Add to purchases collection (this is what MyLibrary.tsx queries)
+          // 1. Add to purchases collection
           await db.collection("purchases").add({
             userId,
             productId,
@@ -112,48 +138,13 @@ async function startServer() {
              });
           });
 
-          // 3. Log sale (redundant but kept for separate tracking if needed, or we can use purchases)
-          await db.collection("sales").add({
-            productId,
-            buyerId: userId,
-            creatorId,
-            amount: parseFloat(amount),
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            stripeSessionId: session.id
-          });
-
-          // 4. Send Discord Notification
-          const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-          if (WEBHOOK_URL) {
-            try {
-              const userDoc = await db.collection("users").doc(userId).get();
-              const buyerName = userDoc.exists ? userDoc.data()?.displayName : (session.customer_details?.email || "Comprador Anônimo");
-              
-              await axios.post(WEBHOOK_URL, {
-                username: "Enzo Assets Notificador",
-                avatar_url: "https://enzo-asset2.vercel.app/logo.png",
-                embeds: [{
-                  title: "🚀 Nova Venda Realizada!",
-                  color: 0xC1FF00,
-                  fields: [
-                    { name: "📦 Produto", value: productData.name, inline: true },
-                    { name: "💰 Valor", value: `R$ ${amount}`, inline: true },
-                    { name: "👤 Comprador", value: buyerName, inline: false }
-                  ],
-                  footer: { text: "Enzo Assets - O melhor para seu jogo" },
-                  timestamp: new Date()
-                }]
-              });
-              console.log("[DISCORD] Aviso de venda enviado!");
-            } catch (discordError) {
-              console.error("[DISCORD] Erro ao enviar aviso:", discordError);
-            }
-          }
-
-          console.log(`[SUCCESS] Purchase processed: User ${userId} bought ${productData.name}`);
+          console.log(`[SUCCESS] Database updated for purchase: User ${userId}`);
         } catch (error) {
-          console.error("[ERROR] Processing successful payment:", error);
+          console.error("[FIREBASE ERROR] Webhook failed to update DB:", error);
         }
+      } else {
+        console.warn("[STRIPE WEBHOOK] FIREBASE_SERVICE_ACCOUNT is missing. Database NOT updated but session was completed.");
+      }
     }
 
     res.json({ received: true });
@@ -179,6 +170,11 @@ async function startServer() {
         return res.status(400).json({ error: "Missing product or user data" });
       }
 
+      // Dynamic URL generation for preview environments
+      const origin = req.get("origin") || req.get("referer") || process.env.VITE_APP_URL || "https://enzo-asset2.vercel.app";
+      // Clean up origin if it's a referer with path
+      const baseUrl = new URL(origin).origin;
+
       const sessionData: any = {
         line_items: [
           {
@@ -203,12 +199,13 @@ async function startServer() {
         metadata: {
           userId: user.uid,
           productId: product.id,
+          productName: product.name, // Added for reliable Discord notifications
           creatorId: product.creatorId,
           amount: product.price.toString(),
         },
         mode: "payment",
-        success_url: `${process.env.VITE_APP_URL || "https://enzo-asset2.vercel.app"}/marketplace?success=true`,
-        cancel_url: `${process.env.VITE_APP_URL || "https://enzo-asset2.vercel.app"}/marketplace?canceled=true`,
+        success_url: `${baseUrl}/marketplace?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/marketplace?canceled=true`,
       };
 
       let session;
@@ -236,9 +233,13 @@ async function startServer() {
 
       res.json({ id: session.id, url: session.url });
     } catch (error: any) {
-      console.error("Stripe Checkout Error:", error);
-      const message = error.raw?.message || error.message || "Falha ao iniciar checkout";
-      res.status(error.statusCode || 500).json({ error: message });
+      console.error("Stripe Checkout Error (Internal):", error);
+      const detail = error.raw?.message || error.message || "Falha ao iniciar checkout";
+      res.status(error.statusCode || 500).json({ 
+        error: "Erro na infraestrutura de pagamento", 
+        detail,
+        fix: "Verifique suas chaves STRIPE_SECRET_KEY nas configurações."
+      });
     }
   });
 
