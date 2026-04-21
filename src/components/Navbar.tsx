@@ -16,7 +16,7 @@ export const Navbar = () => {
     { name: 'Loja', href: '/marketplace' },
     { name: 'Biblioteca', href: '/library' },
     { name: 'Seja Criador', href: '/creators' },
-    { name: 'Discord', href: 'https://discord.gg/example', external: true },
+    { name: 'Discord', href: 'https://discord.gg/tFbNXuuxST', external: true },
   ];
 
   return (

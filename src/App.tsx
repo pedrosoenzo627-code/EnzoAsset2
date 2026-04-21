@@ -75,7 +75,7 @@ const AppContent = () => {
                 <div className="space-y-6">
                   <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">SUPORTE</h4>
                   <div className="flex flex-col space-y-4 text-[9px] font-black uppercase tracking-widest text-gray-500">
-                    <a href="#" className="hover:text-primary transition-colors">DISCORD_HUB</a>
+                    <a href="https://discord.gg/tFbNXuuxST" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">DISCORD_HUB</a>
                     <a href="#" className="hover:text-primary transition-colors">STATUS_CHECK</a>
                     <a href="#" className="hover:text-primary transition-colors">PRIVACIDADE</a>
                   </div>
